@@ -1,0 +1,316 @@
+
+
+// loay NOTE:
+// this file is currently not working, if we want to make it work, we should call it from the index.html
+// this file create a html separate page for chat bot, use it if you want a separate html page for chat bot.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captain Fix ChatBot</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: #ffd700;
+      margin: 0 0 10px 0;
+      font-size: 2rem;
+    }
+    .subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    #chatbox {
+      width: 100%;
+      max-width: 700px;
+      height: 60vh;
+      border: 2px solid #ffd700;
+      border-radius: 16px;
+      padding: 20px;
+      background: rgba(34, 34, 34, 0.95);
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    .message {
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 85%;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .user {
+      background: linear-gradient(135deg, #4a5568, #2d3748);
+      align-self: flex-end;
+      text-align: right;
+      border-radius: 12px 12px 2px 12px;
+      border-right: 3px solid #ffd700;
+    }
+    .bot {
+      background: linear-gradient(135deg, #2d3748, #1a202c);
+      align-self: flex-start;
+      border-left: 3px solid #ffd700;
+      border-radius: 12px 12px 12px 2px;
+    }
+    #inputArea {
+      display: flex;
+      width: 100%;
+      max-width: 700px;
+      gap: 10px;
+    }
+    #userInput {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 2px solid #ffd700;
+      outline: none;
+      background: rgba(34, 34, 34, 0.95);
+      color: #f5f5f5;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+    #userInput:focus {
+      border-color: #ffed4e;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    }
+    #sendBtn {
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #111;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #sendBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    }
+    #sendBtn:active {
+      transform: translateY(0);
+    }
+    #sendBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .command-hints {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+    .command-hints code {
+      background: rgba(255, 215, 0, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #ffd700;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><i class="fas fa-robot"></i> Captain Fix ChatBot</h1>
+    <p class="subtitle">Quick Command Interface</p>
+  </div>
+
+  <div id="chatbox"></div>
+
+  <div id="inputArea">
+    <input
+      type="text"
+      id="userInput"
+      placeholder="Type a command (try 'help')..."
+      autocomplete="off"
+    >
+    <button id="sendBtn">
+      <i class="fas fa-paper-plane"></i>
+      Send
+    </button>
+  </div>
+
+  <div class="command-hints">
+    Try: <code>help</code> | <code>create plan</code> | <code>run tests</code> | <code>status</code>
+  </div>
+
+  <script>
+    const chatbox = document.getElementById("chatbox");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // State management
+    let waitingForUrl = false;
+    let pendingAction = null;
+    let targetUrl = '';
+
+    // Check if running in iframe
+    const isInIframe = window.parent !== window;
+
+    // Welcome message
+    addMessage("Welcome to Captain Fix ChatBot! Type 'help' to see available commands.", "bot");
+
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.textContent = text;
+      chatbox.appendChild(msg);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    // Send message to parent window
+    function sendToParent(action, data) {
+      if (isInIframe) {
+        window.parent.postMessage({
+          source: 'captainChatbot',
+          action: action,
+          data: data
+        }, '*');
+      }
+    }
+
+    function captainReply(command) {
+      const cmd = command.toLowerCase().trim();
+
+      // If we're waiting for a URL
+      if (waitingForUrl) {
+        if (cmd.startsWith('http://') || cmd.startsWith('https://') || cmd.includes('.com') || cmd.includes('.org') || cmd.includes('.net') || cmd.includes('.io')) {
+          targetUrl = command.trim();
+          waitingForUrl = false;
+
+          // Send URL to parent window
+          sendToParent('setUrl', { url: targetUrl });
+
+          if (pendingAction === 'createPlan') {
+            sendToParent('clickButton', { buttonId: 'createPlanBtn' });
+            const action = pendingAction;
+            pendingAction = null;
+            return `URL set to: ${targetUrl}\n\nTriggering test plan creation in main interface...`;
+          } else if (pendingAction === 'runTests') {
+            sendToParent('clickButton', { buttonId: 'executeBtn' });
+            const action = pendingAction;
+            pendingAction = null;
+            return `URL set to: ${targetUrl}\n\nStarting test execution in main interface...`;
+          }
+        } else if (cmd === 'cancel') {
+          waitingForUrl = false;
+          pendingAction = null;
+          return "Action cancelled.";
+        } else {
+          return "That doesn't look like a valid URL.\n\nPlease enter a URL like:\n• https://example.com\n• http://mysite.com\n\nOr type 'cancel' to cancel.";
+        }
+      }
+
+      // Normal commands
+      if (cmd === 'help' || cmd.includes('help')) {
+        return "Available Commands:\n\n• 'create plan' - Generate test plan\n• 'run tests' - Execute test suite\n• 'run all' - Execute complete workflow\n• 'collect evidence' - Gather test evidence\n• 'report' - Generate test report\n• 'send email' - Email results\n• 'status' - Check current status\n• 'clear' - Clear chat history";
+      }
+      else if (cmd === 'create plan' || cmd.includes('create')) {
+        waitingForUrl = true;
+        pendingAction = 'createPlan';
+        return "Creating Test Plan\n\nPlease enter the website URL you want to test:\n\nExample:\n• https://example.com\n• http://mywebsite.com";
+      }
+      else if (cmd === 'run tests' || cmd === 'run test' || cmd === 'execute') {
+        waitingForUrl = true;
+        pendingAction = 'runTests';
+        return "Running Tests\n\nPlease enter the website URL you want to test:\n\nExample:\n• https://example.com\n• http://mywebsite.com";
+      }
+      else if (cmd === 'run all') {
+        sendToParent('clickButton', { buttonId: 'runAllBtn' });
+        return "Starting complete workflow in main interface...";
+      }
+      else if (cmd === 'collect evidence' || cmd.includes('evidence')) {
+        sendToParent('clickButton', { buttonId: 'collectEvidenceBtn' });
+        return "Collecting test evidence...";
+      }
+      else if (cmd === 'report' || cmd === 'generate report') {
+        sendToParent('clickButton', { buttonId: 'generateReportBtn' });
+        return "Generating test report...";
+      }
+      else if (cmd === 'send email' || cmd === 'email') {
+        sendToParent('clickButton', { buttonId: 'sendEmailBtn' });
+        return "Sending email...";
+      }
+      else if (cmd.includes('status')) {
+        const urlStatus = targetUrl ? `Target URL: ${targetUrl}` : 'No URL set yet';
+        return `System Status:\n\n${urlStatus}\nServer: Ready\nInterface: Active\nReady for testing`;
+      }
+      else if (cmd === 'clear') {
+        chatbox.innerHTML = "";
+        addMessage("Chat history cleared!", "bot");
+        return null;
+      }
+      else if (cmd === "") {
+        return "Please enter a command. Type 'help' for available commands.";
+      }
+      else {
+        return `Unknown command: "${command}"\n\nType 'help' to see all available commands.`;
+      }
+    }
+
+    function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      sendBtn.disabled = true;
+
+      addMessage(text, "user");
+
+      setTimeout(() => {
+        const reply = captainReply(text);
+        if (reply) {
+          addMessage(reply, "bot");
+        }
+        sendBtn.disabled = false;
+        userInput.focus();
+      }, 300);
+
+      userInput.value = "";
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+
+    userInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    userInput.focus();
+  </script>
+</body>
+</html>

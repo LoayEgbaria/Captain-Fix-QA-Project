@@ -1,0 +1,38 @@
+# Captain Fix - Autonomous QA Testing Dependencies
+
+# LangChain and OpenAI
+langchain==0.1.0
+langchain-openai==0.0.5
+openai>=1.10.0,<2.0.0
+python-dotenv==1.0.0
+
+# Excel handling
+pandas==2.1.1
+openpyxl==3.1.2
+
+# Email functionality
+# Note: smtplib and email are built-in Python modules, no additional packages needed
+
+# Testing frameworks (for future implementation)
+selenium==4.15.0
+pytest==7.4.0
+
+
+# Jira Integration
+jira>=3.5.0
+
+# Trello Integration
+requests==2.31.0
+
+# File operations and utilities
+#glob2==0.7
+
+
+# Web scraping for CREATE PLAN
+beautifulsoup4==4.12.2
+
+# Allure
+allure-pytest
+allure-python-commons
+
+#added on tools --> allure==2.35.1

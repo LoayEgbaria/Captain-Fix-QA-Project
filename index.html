@@ -1,0 +1,2640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captain Fix - Autonomous QA Testing Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #8b5cf6;
+            --accent-color: #06b6d4;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --surface-elevated: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-focus: #6366f1;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .form-container {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .results-container {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            font-weight: 400;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        input[type="url"], 
+        input[type="email"], 
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-primary);
+            background: var(--surface);
+            transition: all 0.2s ease;
+        }
+
+        input[type="url"]:focus, 
+        input[type="email"]:focus, 
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Style number input spinners */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        select {
+            padding-left: 48px;
+            cursor: pointer;
+        }
+
+        .optional {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #7c3aed);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .action-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .status-indicator.success {
+            background: var(--success-color);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .status-indicator.error {
+            background: var(--error-color);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+        }
+
+        .status-indicator.loading {
+            background: var(--warning-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+
+        .fa-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-content {
+            display: none;
+        }
+
+        .result-content.active {
+            display: block;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 1px solid #93c5fd;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .info-card h4 {
+            color: #1e40af;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .warning-card {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 1px solid #f59e0b;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .warning-card h4 {
+            color: #92400e;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .success-card {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 1px solid #10b981;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .success-card h4 {
+            color: #065f46;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .error-card {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 1px solid #ef4444;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .error-card h4 {
+            color: #991b1b;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            color: var(--text-secondary);
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-container,
+            .results-container {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .button-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+    /* Floating Chatbot Widget */
+    .chatbot-toggle {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #ffb300, #ff8c00);
+        border-radius: 50%;
+        border: 2px solid #ffd700;
+        box-shadow: 0 4px 20px rgba(255, 179, 0, 0.4);
+        cursor: pointer;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f5f5f5;
+        font-size: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .chatbot-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(255, 179, 0, 0.6);
+    }
+
+    .chatbot-widget {
+        position: fixed;
+        bottom: 100px;
+        right: 30px;
+        width: 400px;
+        height: 550px;
+        background: rgba(34, 34, 34, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        display: none;
+        flex-direction: column;
+        z-index: 999;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .chatbot-widget.active {
+        display: flex;
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .chatbot-header {
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+        color: #f5f5f5;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Import a clean modern font */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap');
+
+    .chatbot-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #ffd700; /* orange-gold */
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    }
+
+
+    .chatbot-close {
+        background: rgba(239, 68, 68, 0.2);  /* Red background with transparency */
+        border: 2px solid #ef4444;            /* Red border */
+        color: #ef4444;                       /* Red icon color */
+        cursor: pointer;
+        font-size: 20px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .chatbot-close:hover {
+        background: #ef4444;                  /* Solid red on hover */
+        color: white;                         /* White icon on hover */
+        transform: translateY(-3px) rotate(90deg);  /* Move up and rotate */
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);  /* Red glow shadow */
+    }
+
+    .chatbot-close:active {
+        transform: translateY(-1px) rotate(90deg);  /* Slight press effect */
+    }
+
+    .chatbot-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: rgba(34, 34, 34, 0.95);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .chat-message {
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 80%;
+        word-wrap: break-word;
+        line-height: 1.5;
+        font-size: 0.9rem;
+        white-space: pre-line;
+        animation: fadeIn 0.3s ease;
+        /* Remove full border */
+        border: none;
+    }
+
+    /* User message: orange border on the right side */
+    .chat-user {
+        background: linear-gradient(135deg, #4a5568, #2d3748);
+        color: #f5f5f5;
+        align-self: flex-end;
+        border-radius: 12px 12px 2px 12px;
+        border-right: 3px solid #ffd700; /* only right side */
+    }
+
+    /* Bot message: orange border on the left side */
+    .chat-bot {
+        background: linear-gradient(135deg, #2d3748, #1a202c);
+        color: #f5f5f5;
+        align-self: flex-start;
+        border-radius: 12px 12px 12px 2px;
+        border-left: 3px solid #ffd700; /* only left side */
+    }
+
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+
+
+
+    .chatbot-input-area {
+        display: flex;
+        padding: 16px;
+        border-top: 1px solid #4a5568;
+        background: rgba(34, 34, 34, 0.95);
+        gap: 10px;
+    }
+
+    .chatbot-input {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #4a4a4a;          /* subtle dark gray border by default */
+        border-radius: 10px;
+        outline: none;
+        font-size: 0.9rem;
+        background: #1a1a1a;                /* deep dark background */
+        color: #f5f5f5;                     /* light text for readability */
+        transition: border-color 0.2s, box-shadow 0.3s;
+    }
+
+    .chatbot-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);    /* softer placeholder */
+    }
+
+    .chatbot-input:focus {
+        border-color: #ffd700;              /* gold on focus */
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+        background: #111;                   /* even darker on focus for depth */
+    }
+
+    .chatbot-send {
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #111;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .chatbot-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    }
+
+    @media (max-width: 640px) {
+        .chatbot-widget {
+            width: calc(100vw - 40px);
+            right: 20px;
+        }
+    }
+
+
+
+
+
+
+    /* Hide all action buttons except Run All */
+    #serverStartBtn,
+    #createPlanBtn,
+    #executeBtn,
+    #collectEvidenceBtn,
+    #generateReportBtn,
+    #sendEmailBtn,
+
+    #runAllAdvancedBtn {
+        display: none !important;
+    }
+
+    /* Adjust button grid for single button */
+    .button-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+
+
+
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Configuration Panel -->
+        <div class="form-container">
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div>
+                        <h1>Captain Fix</h1>
+                        <p class="subtitle">Autonomous QA Testing Platform</p>
+                    </div>
+                </div>
+            </div>
+
+            <form id="captainForm">
+                <!-- Website Configuration -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-globe"></i>
+                        Website Configuration
+                    </h3>
+                    <div class="form-group">
+                        <label for="websiteUrl">Target Website *</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-link input-icon"></i>
+                            <input type="url" id="websiteUrl" name="websiteUrl" placeholder="https://example.com" required>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="credentialsFile">Credentials File (Optional)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key input-icon"></i>
+                        <input type="url" id="credentialsFile" name="credentialsFile" placeholder="file:///C:/path/to/credentials.txt or https://example.com/creds.txt">
+                    </div>
+                    <small class="optional">Path to file containing username and password.</small>
+                </div>
+
+
+                <!-- Testing Parameters -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-cogs"></i>
+                        Testing Parameters
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testDepth">Number of Test Cases</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-hashtag input-icon"></i>
+                                <input type="number" id="testDepth" name="testDepth" placeholder="12" value="12">
+                            </div>
+                            <small class="optional">Enter the number of test cases to generate</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="browser">Browser</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-window-maximize input-icon"></i>
+                                <select id="browser" name="browser">
+                                    <option value="chrome">Chrome</option>
+                                    <option value="firefox">Firefox</option>
+                                    <option value="edge">Edge</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integration Settings -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-plug"></i>
+                        Integration Settings
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" id="email" name="email" placeholder="user@domain.com">
+                            </div>
+                            <small class="optional">Optional - for receiving test reports</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="pmTool">Project Management Tool</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-tasks input-icon"></i>
+                                <select id="pmTool" name="pmTool">
+                                    <option value="jira">Jira</option>
+                                    <option value="trello">Trello</option>
+                                    <option value="none">None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-grid">
+                    <button type="button" class="action-button btn-primary" id="serverStartBtn">
+                        <i class="fas fa-server"></i>
+                        Start Server
+                    </button>
+                    <button type="button" class="action-button btn-secondary" id="createPlanBtn">
+                        <span class="btn-text">
+                            <i class="fas fa-file-excel"></i>
+                            Create Plan
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+
+                    <button type="button" class="action-button" id="executeBtn" style="background: linear-gradient(135deg, #ef4444, #b91c1c); color: white;">
+                        <span class="btn-text">
+                            <i class="fas fa-play"></i>
+                            Run Executor
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+                    <button type="button" class="action-button" id="collectEvidenceBtn" style="background: linear-gradient(135deg, #06b6d4, #0ea5e9); color: white;">
+                        <span class="btn-text">
+                            <i class="fas fa-folder-open"></i>
+                            Collect Evidence
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+                    <button type="button" class="action-button" id="generateReportBtn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                        <i class="fas fa-file-alt"></i>
+                        <span class="btn-text">
+                            Generate Report
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+                    <button type="button" class="action-button" id="sendEmailBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                        <span class="btn-text">
+                            <i class="fas fa-envelope"></i>
+                            Send Email
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+
+
+
+
+                    <button type="button" class="action-button" id="runAllBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                        <span class="btn-text">
+                            <i class="fas fa-rocket"></i>
+                            RUN
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+
+
+                    <button type="button" class="action-button" disabled id="healingReportBtn" style="background: linear-gradient(135deg, #ec4899, #be185d); color: white;">
+                        <span class="btn-text">
+                            <i class="fas fa-magic"></i>
+                            Healing Report
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+
+                    <button type="button" class="action-button" disabled id="visualReportBtn" style="background: linear-gradient(135deg, #14b8a6, #0d9488); color: white;">
+                        <span class="btn-text">
+                            <i class="fas fa-eye"></i>
+                            Visual Report
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+
+                    <button type="button" class="action-button" id="runAllAdvancedBtn" style="background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);">
+                        <span class="btn-text">
+                            <i class="fas fa-rocket"></i>
+                            <i class="fas fa-magic"></i>
+                            Run All + AI Features
+                        </span>
+                        <i class="fas fa-spinner fa-spin btn-loading" style="display: none;"></i>
+                    </button>
+
+
+
+
+
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="results-container">
+            <div class="results-header">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <h2 class="results-title">Test Results</h2>
+            </div>
+
+            <div class="result-content" id="resultContent">
+                <div class="info-card">
+                    <h4><i class="fas fa-info-circle"></i> Ready to Start</h4>
+                    <p>Configure your testing parameters and click "Start Server" to begin the QA process.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variable to store the JSON response
+        let planData = null;
+        let awaitingUrlInput = false;
+        let pendingCommand = null;
+
+        // Helper functions for status updates
+        function updateStatus(status) {
+            const indicator = document.getElementById('statusIndicator');
+            indicator.className = `status-indicator ${status}`;
+        }
+
+        function showResult(content) {
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = content;
+            resultContent.classList.add('active');
+        }
+
+        // Helper functions for button loading states
+        function showLoading(buttonId) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.disabled = true;
+                button.classList.add('loading');
+                const btnText = button.querySelector('.btn-text');
+                const btnLoading = button.querySelector('.btn-loading');
+                if (btnText) btnText.style.display = 'none';
+                if (btnLoading) btnLoading.style.display = 'inline-block';
+            }
+        }
+
+        function hideLoading(buttonId) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.disabled = false;
+                button.classList.remove('loading');
+                const btnText = button.querySelector('.btn-text');
+                const btnLoading = button.querySelector('.btn-loading');
+                if (btnText) btnText.style.display = 'inline-block';
+                if (btnLoading) btnLoading.style.display = 'none';
+            }
+        }
+
+        // Server Start Button
+        document.getElementById('serverStartBtn').addEventListener('click', function() {
+            updateStatus('loading');
+
+            const content = `
+                <div class="info-card">
+                    <h4><i class="fas fa-server"></i> Server Start Instructions</h4>
+                    <p>Follow these steps to start the Captain Fix server:</p>
+                </div>
+
+                <div class="warning-card">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Browser Security Limitation</h4>
+                    <p>Browsers cannot directly start Python processes for security reasons.</p>
+                </div>
+
+                <div class="success-card">
+                    <h4><i class="fas fa-list-ol"></i> Quick Start Instructions</h4>
+                    <ol style="margin-left: 20px; color: var(--text-secondary);">
+                        <li><strong>Double-click</strong> the <code>start_server.bat</code> file in your project folder</li>
+                        <li><strong>Wait</strong> for "Server running on http://localhost:8000" message</li>
+                        <li><strong>Click "Create Plan"</strong> button to generate test plans</li>
+                        <li><strong>Keep the terminal window open</strong> while using the web interface</li>
+                    </ol>
+                </div>
+
+                <div class="info-card">
+                    <h4><i class="fas fa-terminal"></i> Alternative Method</h4>
+                    <p>Open terminal in project folder and run: <code>python server.py</code></p>
+                </div>
+            `;
+
+            showResult(content);
+            updateStatus('success');
+        });
+
+
+
+        // Execute Button
+        document.getElementById('executeBtn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('captainForm'));
+            const data = Object.fromEntries(formData);
+
+            // Validate required fields
+            if (!data.websiteUrl) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Validation Error</h4>
+                        <p>Please enter a valid website URL before running tests.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            // Handle test depth - use default if empty or invalid
+            let testDepthNum = parseInt(data.testDepth);
+            if (isNaN(testDepthNum) || testDepthNum <= 0 || !data.testDepth || data.testDepth.trim() === '') {
+                testDepthNum = 12; // Use default value
+            }
+
+            // Update the form data with the resolved value
+            data.testDepth = testDepthNum;
+
+            updateStatus('loading');
+
+            // Show loading message
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-cog fa-spin"></i> Executing Test Plan</h4>
+                    <p>Running automated tests and collecting results...</p>
+                    <div style="margin-top: 16px;">
+                        <div style="background: var(--border); height: 4px; border-radius: 2px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #ef4444, #dc2626); height: 100%; width: 70%; animation: loading 2s infinite;"></div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Call Python script via server
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:8000/api/run-executor', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                // Parse the JSON response from Python script
+                                const jsonResponse = JSON.parse(xhr.responseText);
+
+                                // Print JSON to console for debugging
+                                console.log("=== RETURNED JSON FROM qa_executor.py ===");
+                                console.log(JSON.stringify(jsonResponse, null, 2));
+                                console.log("==========================================");
+
+                                // Check if it's an error response
+                                if (jsonResponse.status === 'error') {
+                                    updateStatus('error');
+                                    showResult(`
+                                        <div class="error-card">
+                                            <h4><i class="fas fa-exclamation-triangle"></i> ${jsonResponse.message}</h4>
+                                            <p>${jsonResponse.action || 'Please try again or check the logs.'}</p>
+                                            ${jsonResponse.details && jsonResponse.details.suggestion ? `<p><strong>Suggestion:</strong> ${jsonResponse.details.suggestion}</p>` : ''}
+                                        </div>
+                                    `);
+                                    return;
+                                }
+
+                                // Success response - display test results
+                                updateStatus('success');
+
+                                const testResults = jsonResponse.test_results || [];
+                                const passed = jsonResponse.passed || 0;
+                                const failed = jsonResponse.failed || 0;
+                                const total = jsonResponse.total_tests || testResults.length;
+                                const passRate = jsonResponse.pass_rate || '0%';
+
+                                let resultsHtml = `
+                                    <div class="success-card">
+                                        <h4><i class="fas fa-check-circle"></i> Test Execution Completed</h4>
+                                        <div class="stats-grid">
+                                            <div class="stat-item">
+                                                <span class="stat-number">${total}</span>
+                                                <span class="stat-label">Total Tests</span>
+                                            </div>
+                                            <div class="stat-item success">
+                                                <span class="stat-number">${passed}</span>
+                                                <span class="stat-label">Passed</span>
+                                            </div>
+                                            <div class="stat-item error">
+                                                <span class="stat-number">${failed}</span>
+                                                <span class="stat-label">Failed</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span class="stat-number">${passRate}</span>
+                                                <span class="stat-label">Pass Rate</span>
+                                            </div>
+                                        </div>
+                                `;
+
+
+                                // Add Allure Report section (choose one version below)
+                                const allureReportPath = "generated_files/allure-report/index.html";
+
+                                /* --- Option 1: Button link (opens Allure in new tab) --- */
+
+                                resultsHtml += `
+                                    <div class="info-card">
+                                        <h4><i class="fas fa-chart-line"></i> Allure Test Report</h4>
+                                        <p>A detailed interactive report is available with charts, logs, and screenshots.</p>
+                                        <a href="${allureReportPath}" target="_blank"
+                                           style="display:inline-block; margin-top:10px; text-decoration:none;">
+                                            <button class="action-button btn-primary">
+                                                <i class="fas fa-external-link-alt"></i> Open Allure Report
+                                            </button>
+                                        </a>
+                                    </div>
+                                `;
+
+                                if (testResults.length > 0) {
+                                    resultsHtml += `
+                                        <div class="test-results">
+                                            <h5>Test Results:</h5>
+                                            <div class="test-list">
+                                    `;
+
+                                    testResults.forEach(test => {
+                                        const statusClass = test.status === 'PASS' ? 'success' : 'error';
+                                        const statusIcon = test.status === 'PASS' ? 'fa-check' : 'fa-times';
+                                        resultsHtml += `
+                                            <div class="test-item ${statusClass}">
+                                                <i class="fas ${statusIcon}"></i>
+                                                <span class="test-name">${test.testName}</span>
+                                                <span class="test-duration">${test.duration.toFixed(2)}s</span>
+                                                ${test.error ? `<span class="test-error">${test.error}</span>` : ''}
+                                            </div>
+                                        `;
+                                    });
+
+                                    resultsHtml += `
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+
+                                resultsHtml += `
+                                        <p><strong>Website:</strong> ${data.websiteUrl}</p>
+                                        <p><strong>Test Depth:</strong> ${data.testDepth} test cases</p>
+                                        <p><strong>Results saved to:</strong> generated_files/results/</p>
+                                    </div>
+                                `;
+
+                                showResult(resultsHtml);
+
+                            } catch (e) {
+                                // Fallback if JSON parsing fails
+                                console.error("Error details:", e);
+                                updateStatus('error');
+                                showResult(`
+                                    <div class="error-card">
+                                        <h4><i class="fas fa-exclamation-triangle"></i> Parse Error</h4>
+                                        <p>Could not parse response from Python script.</p>
+                                        <p><strong>Details:</strong> ${e.message || 'Unknown error occurred'}</p>
+                                    </div>
+                                `);
+                            }
+                        } else {
+                            // Fallback: show error if server is not running
+                            updateStatus('error');
+                            showResult(`
+                                <div class="error-card">
+                                    <h4><i class="fas fa-server"></i> Server Connection Error</h4>
+                                    <p>The Captain Fix server is not running. Please follow these steps:</p>
+                                    <ul style="margin-left: 20px; color: var(--text-secondary);">
+                                        <li>Open terminal in project folder</li>
+                                        <li>Run: <code>python server.py</code></li>
+                                        <li>Refresh this page: <code>http://localhost:8000/index.html</code></li>
+                                    </ul>
+                                </div>
+                            `);
+                        }
+                    }
+                };
+
+                xhr.send(JSON.stringify(data));
+            } catch (error) {
+                // Fallback: show error if there's a problem
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Connection Error</h4>
+                        <p>Failed to connect to the server: ${error.message}</p>
+                    </div>
+                `);
+            }
+        });
+
+
+
+        // Create Plan Button
+        document.getElementById('createPlanBtn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('captainForm'));
+            const data = Object.fromEntries(formData);
+
+            // Validate required fields
+            if (!data.websiteUrl) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Validation Error</h4>
+                        <p>Please enter a valid website URL before creating a test plan.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            // Handle test depth - use default if empty or invalid
+            let testDepthNum = parseInt(data.testDepth);
+            if (isNaN(testDepthNum) || testDepthNum <= 0 || !data.testDepth || data.testDepth.trim() === '') {
+                testDepthNum = 12; // Use default value
+            }
+
+            // Update the form data with the resolved value
+            data.testDepth = testDepthNum;
+
+            // Show button loading state
+            const btn = document.getElementById('createPlanBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoading = btn.querySelector('.btn-loading');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+
+            updateStatus('loading');
+
+            // Show loading message
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-cog fa-spin"></i> Generating Test Plan</h4>
+                    <p>Analyzing website and creating comprehensive test cases...</p>
+                    <div style="margin-top: 16px;">
+                        <div style="background: var(--border); height: 4px; border-radius: 2px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); height: 100%; width: 60%; animation: loading 2s infinite;"></div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Call Python script via server
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:8000/api/run-create-plan', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                // Parse the JSON response from Python script
+                                const jsonResponse = JSON.parse(xhr.responseText);
+                                planData = jsonResponse; // Store for next button
+
+                                // Print JSON to console for debugging
+                                console.log("=== RETURNED JSON FROM create_plan.py ===");
+                                console.log(JSON.stringify(jsonResponse, null, 2));
+                                console.log("==========================================");
+
+                                // Create the output using JSON data
+                                const testPlan = jsonResponse.data.testPlan;
+
+                                // Count total test cases across all test suites
+                                let totalTestCases = 0;
+                                testPlan.testSuites.forEach(suite => {
+                                    totalTestCases += suite.testCases.length;
+                                });
+
+                                const websiteAnalysis = testPlan.websiteAnalysis;
+
+                                // Safety checks
+                                if (!testPlan || !testPlan.testSuites || !websiteAnalysis) {
+                                    throw new Error("Missing required data in test plan");
+                                }
+
+                                const output = `Captain Fix - Create Test Plan
+==================================================
+Target Website: ${jsonResponse.data.websiteUrl}
+Test Depth: ${jsonResponse.data.testDepth}
+Website Title: ${websiteAnalysis.title}
+Description: ${websiteAnalysis.description}
+==================================================
+Creating test plan structure...
+[OK] Test plan structure generated
+[OK] Test cases created: ${totalTestCases} total
+  - Test Suites: ${testPlan.testSuites.length}
+  - Test Cases per Suite: ${testPlan.testSuites.map(s => s.testCases.length).join(', ')}
+[OK] Website analysis completed
+[OK] Test plan saved to JSON structure
+SUCCESS: Test Plan created successfully!
+Timestamp: ${new Date().toLocaleString()}`;
+
+                                // Display the output with modern design
+                                updateStatus('success');
+                                showResult(`
+                                    <div class="success-card">
+                                        <h4><i class="fas fa-check-circle"></i> Test Plan Generated Successfully!</h4>
+                                        <p>Your comprehensive test plan has been created and saved.</p>
+                                    </div>
+
+                                    <div class="stats-grid">
+                                        <div class="stat-card">
+                                            <div class="stat-number">${totalTestCases}</div>
+                                            <div class="stat-label">Test Cases</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-number">${testPlan.testSuites.length}</div>
+                                            <div class="stat-label">Test Suites</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-number">${jsonResponse.data.testDepth}</div>
+                                            <div class="stat-label">Test Depth</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-number">${websiteAnalysis.keyFeatures.length}</div>
+                                            <div class="stat-label">Features</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-card">
+                                        <h4><i class="fas fa-globe"></i> Website Analysis</h4>
+                                        <p><strong>Title:</strong> ${websiteAnalysis.title}</p>
+                                        <p><strong>Description:</strong> ${websiteAnalysis.description}</p>
+                                        <p><strong>Key Features:</strong> ${websiteAnalysis.keyFeatures.join(', ')}</p>
+                                    </div>
+
+
+                                    <div class="info-card">
+                                        <h4><i class="fas fa-tasks"></i> Configuration</h4>
+                                        <p><strong>Target Website:</strong> ${jsonResponse.data.websiteUrl}</p>
+                                        <p><strong>Test Depth:</strong> ${jsonResponse.data.testDepth} test cases</p>
+                                        <p><strong>PM Tool:</strong> ${data.pmTool.charAt(0).toUpperCase() + data.pmTool.slice(1)}</p>
+                                        <p><strong>Browser:</strong> ${data.browser.charAt(0).toUpperCase() + data.browser.slice(1)}</p>
+                                    </div>
+
+
+                                    <div class="info-card">
+                                        <h4><i class="fas fa-file-excel"></i> Excel Export Status</h4>
+                                        ${jsonResponse.data.excelExport.success ?
+                                            `<p><i class="fas fa-check text-green-600"></i> <strong>Success:</strong> ${jsonResponse.data.excelFile}</p>
+                                             <p><i class="fas fa-folder"></i> Saved to <code>generated_files/</code> folder</p>` :
+                                            `<p><i class="fas fa-times text-red-600"></i> <strong>Error:</strong> ${jsonResponse.data.excelExport.message}</p>`
+                                        }
+                                    </div>
+
+                                    <div class="info-card">
+                                        <h4><i class="fas fa-file-code"></i> JSON Export Status</h4>
+                                        ${jsonResponse.data.jsonExport.success ?
+                                            `<p><i class="fas fa-check text-green-600"></i> <strong>Success:</strong> ${jsonResponse.data.jsonExport.filename}</p>
+                                             <p><i class="fas fa-folder"></i> Saved to <code>generated_files/</code> folder</p>` :
+                                            `<p><i class="fas fa-times text-red-600"></i> <strong>Error:</strong> ${jsonResponse.data.jsonExport.message}</p>`
+                                        }
+                                    </div>
+
+
+                                    <div class="code-block">${output}</div>
+                                `);
+
+                                // Reset button state
+                                btn.disabled = false;
+                                btnText.style.display = 'inline';
+                                btnLoading.style.display = 'none';
+                            } catch (e) {
+                                // Fallback if JSON parsing fails
+                                console.error("Error details:", e);
+                                updateStatus('error');
+                                showResult(`
+                                    <div class="error-card">
+                                        <h4><i class="fas fa-exclamation-triangle"></i> Parse Error</h4>
+                                        <p>Could not parse response from Python script.</p>
+                                        <p><strong>Details:</strong> ${e.message || 'Unknown error occurred'}</p>
+                                    </div>
+                                `);
+                            }
+                        } else {
+                            // Fallback: show error if server is not running
+                            updateStatus('error');
+                            showResult(`
+                                <div class="error-card">
+                                    <h4><i class="fas fa-server"></i> Server Connection Error</h4>
+                                    <p>The Captain Fix server is not running. Please follow these steps:</p>
+                                    <ul style="margin-left: 20px; color: var(--text-secondary);">
+                                        <li>Open terminal in project folder</li>
+                                        <li>Run: <code>python server.py</code></li>
+                                        <li>Refresh this page: <code>http://localhost:8000/index.html</code></li>
+                                    </ul>
+                                </div>
+                            `);
+                        }
+                    }
+                };
+
+                xhr.send(JSON.stringify(data));
+            } catch (error) {
+                // Fallback: show error if there's a problem
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-wifi"></i> Connection Error</h4>
+                        <p>Unable to connect to the Captain Fix server. Please ensure:</p>
+                        <ul style="margin-left: 20px; color: var(--text-secondary);">
+                            <li>The server is running (<code>python server.py</code>)</li>
+                            <li>You're accessing the page via <code>http://localhost:8000/index.html</code></li>
+                            <li>No firewall is blocking the connection</li>
+                        </ul>
+                    </div>
+                `);
+            }
+        });
+
+        // Generate Report Button
+        document.getElementById('generateReportBtn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('captainForm'));
+            const data = Object.fromEntries(formData);
+
+            // Validate required fields
+            if (!data.websiteUrl || data.websiteUrl.trim() === '') {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Website URL Required</h4>
+                        <p>Please enter a valid website URL before generating the report.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            if (!data.testDepth || data.testDepth.trim() === '') {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Test Depth Required</h4>
+                        <p>Please enter the number of test cases before generating the report.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            // Show loading state
+            const btn = document.getElementById('generateReportBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoading = btn.querySelector('.btn-loading');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+
+            updateStatus('loading');
+            showResult(`
+                <div class="loading-card">
+                    <div class="loading-spinner"></div>
+                    <h4>Generating Professional Report...</h4>
+                    <p>Creating comprehensive test report with AI-powered analysis</p>
+                    <div class="progress-steps">
+                        <div class="step active">📊 Analyzing test data</div>
+                        <div class="step">📝 Generating markdown report</div>
+                        <div class="step">🎨 Creating HTML report</div>
+                        <div class="step">📦 Packaging files</div>
+                    </div>
+                </div>
+            `);
+
+            // Make API call to generate report
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/generate-report', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    // Reset button state
+                    btn.disabled = false;
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.error) {
+                                updateStatus('error');
+                                showResult(`
+                                    <div class="error-card">
+                                        <h4><i class="fas fa-exclamation-circle"></i> Report Generation Failed</h4>
+                                        <p>${response.error}</p>
+                                        ${response.details ? `<div class="error-details"><strong>Details:</strong> ${response.details}</div>` : ''}
+                                    </div>
+                                `);
+                            } else {
+                                updateStatus('success');
+                                showResult(`
+                                    <div class="success-card">
+                                        <h4><i class="fas fa-check-circle"></i> Report Generated Successfully!</h4>
+                                        <p>Professional test report has been created with the following files:</p>
+                                        <div class="file-list">
+                                            <div class="file-item">
+                                                <i class="fas fa-file-alt"></i>
+                                                <span>${response.markdown_file || 'summary.md'}</span>
+                                                <small>Markdown Report</small>
+                                            </div>
+                                            <div class="file-item">
+                                                <i class="fas fa-file-code"></i>
+                                                <span>${response.html_file || 'summary.html'}</span>
+                                                <small>HTML Report</small>
+                                            </div>
+                                            <div class="file-item">
+                                                <i class="fas fa-file-archive"></i>
+                                                <span>${response.zip_file || 'CaptinAiReport.zip'}</span>
+                                                <small>Complete Package</small>
+                                            </div>
+                                        </div>
+                                        <div class="report-stats">
+                                            <div class="stat">
+                                                <strong>Website:</strong> ${response.website || data.websiteUrl}
+                                            </div>
+                                            <div class="stat">
+                                                <strong>Test Cases:</strong> ${response.test_count || data.testDepth}
+                                            </div>
+                                            <div class="stat">
+                                                <strong>Report Type:</strong> Professional Test Report
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+                            }
+                        } catch (e) {
+                            updateStatus('error');
+                            showResult(`
+                                <div class="error-card">
+                                    <h4><i class="fas fa-exclamation-circle"></i> Parse Error</h4>
+                                    <p>Invalid response from server. Please try again.</p>
+                                    <div class="error-details">Response: ${xhr.responseText.substring(0, 200)}...</div>
+                                </div>
+                            `);
+                        }
+                    } else {
+                        updateStatus('error');
+                        showResult(`
+                            <div class="error-card">
+                                <h4><i class="fas fa-exclamation-circle"></i> Server Error</h4>
+                                <p>Failed to generate report. Please try again.</p>
+                                <div class="error-details">Status: ${xhr.status}</div>
+                            </div>
+                        `);
+                    }
+                }
+            };
+
+            xhr.send(JSON.stringify({
+                websiteUrl: data.websiteUrl,
+                testDepth: parseInt(data.testDepth) || 8
+            }));
+        });
+
+        // Send Email Button
+        document.getElementById('sendEmailBtn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('captainForm'));
+            const data = Object.fromEntries(formData);
+
+            // Validate email field
+            if (!data.email || data.email.trim() === '' || !data.email.includes('@')) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Email Required</h4>
+                        <p>Please enter a valid email address in the Email Address field before sending email.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            // Validate websiteUrl and testDepth for ZIP file identification
+            if (!data.websiteUrl || data.websiteUrl.trim() === '') {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Website URL Required</h4>
+                        <p>Please enter a website URL to identify the report ZIP file.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            if (!data.testDepth || data.testDepth.trim() === '') {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Test Depth Required</h4>
+                        <p>Please enter the number of test cases to identify the report ZIP file.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            // Show button loading state
+            const btn = document.getElementById('sendEmailBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoading = btn.querySelector('.btn-loading');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+
+            updateStatus('loading');
+
+            // Show loading message
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-envelope fa-spin"></i> Sending Email</h4>
+                    <p>Preparing and sending test results email to ${data.email}...</p>
+                    <div style="margin-top: 16px;">
+                        <div style="background: var(--border); height: 4px; border-radius: 2px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); height: 100%; width: 70%; animation: loading 2s infinite;"></div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Prepare email data (using form data directly)
+            const emailData = {
+                email: data.email,
+                websiteUrl: data.websiteUrl,
+                testDepth: parseInt(data.testDepth) || 8
+            };
+
+            // Call email API
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:8000/api/send-email', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                const jsonResponse = JSON.parse(xhr.responseText);
+
+                                if (jsonResponse.status === 'success') {
+                                    updateStatus('success');
+                                    showResult(`
+                                        <div class="success-card">
+                                            <h4><i class="fas fa-check-circle"></i> Email Sent Successfully!</h4>
+                                            <p>Test results have been sent to ${jsonResponse.data.emailSent.recipient}</p>
+                                        </div>
+
+                                        <div class="info-card">
+                                            <h4><i class="fas fa-paperclip"></i> Email Details</h4>
+                                            <p><strong>Recipient:</strong> ${jsonResponse.data.emailSent.recipient}</p>
+                                            <p><strong>Subject:</strong> Captain Results — ${emailData.websiteUrl} — ${new Date().toLocaleString()}</p>
+                                            <p><strong>Attachments:</strong></p>
+                                            <ul style="margin-left: 20px; color: var(--text-secondary);">
+                                                ${jsonResponse.data.emailSent.attachments.zipFile ? `<li>Evidence ZIP: ${jsonResponse.data.emailSent.attachments.zipFile.split('/').pop()}</li>` : ''}
+                                            </ul>
+                                        </div>
+
+                                        <div class="info-card">
+                                            <h4><i class="fas fa-info-circle"></i> Email Contents</h4>
+                                            <p>The email includes:</p>
+                                            <ul style="margin-left: 20px; color: var(--text-secondary);">
+                                                <li>Test Plan (Excel)</li>
+                                                <li>Test Results (Excel)</li>
+                                                <li>Test Report (HTML)</li>
+                                            </ul>
+                                        </div>
+                                    `);
+
+                                    // Reset button state
+                                    btn.disabled = false;
+                                    btnText.style.display = 'inline';
+                                    btnLoading.style.display = 'none';
+                                } else {
+                                    updateStatus('error');
+                                    showResult(`
+                                        <div class="error-card">
+                                            <h4><i class="fas fa-times-circle"></i> Email Failed</h4>
+                                            <p><strong>Error:</strong> ${jsonResponse.message}</p>
+                                            <p><strong>Details:</strong> ${jsonResponse.data.emailSent.message}</p>
+                                        </div>
+                                    `);
+
+                                    // Reset button state
+                                    btn.disabled = false;
+                                    btnText.style.display = 'inline';
+                                    btnLoading.style.display = 'none';
+                                }
+                            } catch (e) {
+                                updateStatus('error');
+                                showResult(`
+                                    <div class="error-card">
+                                        <h4><i class="fas fa-exclamation-triangle"></i> Parse Error</h4>
+                                        <p>Could not parse response from email service.</p>
+                                        <p><strong>Details:</strong> ${e.message || 'Unknown error occurred'}</p>
+                                    </div>
+                                `);
+                            }
+                        } else {
+                            updateStatus('error');
+                            showResult(`
+                                <div class="error-card">
+                                    <h4><i class="fas fa-server"></i> Server Connection Error</h4>
+                                    <p>The Captain Fix server is not running. Please follow these steps:</p>
+                                    <ul style="margin-left: 20px; color: var(--text-secondary);">
+                                        <li>Open terminal in project folder</li>
+                                        <li>Run: <code>python server.py</code></li>
+                                        <li>Refresh this page: <code>http://localhost:8000/index.html</code></li>
+                                    </ul>
+                                </div>
+                            `);
+                        }
+                    }
+                };
+
+                xhr.send(JSON.stringify(emailData));
+            } catch (error) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-wifi"></i> Connection Error</h4>
+                        <p>Unable to connect to the Captain Fix server. Please ensure:</p>
+                        <ul style="margin-left: 20px; color: var(--text-secondary);">
+                            <li>The server is running (<code>python server.py</code>)</li>
+                            <li>You're accessing the page via <code>http://localhost:8000/index.html</code></li>
+                            <li>No firewall is blocking the connection</li>
+                        </ul>
+                    </div>
+                `);
+            }
+        });
+
+        // Collect Evidence Button
+        document.getElementById('collectEvidenceBtn').addEventListener('click', function() {
+            updateStatus('loading');
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-folder-open fa-spin"></i> Collecting Evidence</h4>
+                    <p>Running evidence collection script. Please wait...</p>
+                    <div style="margin-top: 16px;">
+                        <div style="background: var(--border); height: 4px; border-radius: 2px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, var(--accent-color), var(--primary-color)); height: 100%; width: 80%; animation: loading 2s infinite;"></div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Call Python script via server
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:8000/api/collect-evidence', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                const jsonResponse = JSON.parse(xhr.responseText);
+                                if (jsonResponse.status === 'success') {
+                                    updateStatus('success');
+                                    // Show evidence files to user
+                                    const htmlFiles = jsonResponse.data.htmlFiles || [];
+                                    let filesList = '';
+                                    if (htmlFiles.length > 0) {
+                                        filesList = `<ul style="margin-left: 20px; color: var(--text-secondary);">` +
+                                            htmlFiles.map(f => `<li><code>${f}</code></li>`).join('') +
+                                            `</ul>`;
+                                    } else {
+                                        filesList = `<p>No HTML evidence files found.</p>`;
+                                    }
+                                    showResult(`
+                                        <div class="success-card">
+                                            <h4><i class="fas fa-check-circle"></i> Evidence Collected!</h4>
+                                            <p>Evidence has been successfully collected and saved.</p>
+                                        </div>
+                                        <div class="info-card">
+                                            <h4><i class="fas fa-file-archive"></i> Evidence Details</h4>
+                                            <p><strong>HTML Evidence Files:</strong></p>
+                                            ${filesList}
+                                            <p><i class="fas fa-folder"></i> Saved to <code>html.results/</code> folder</p>
+                                            <p>You can open these HTML files to view the evidence for each test.</p>
+                                        </div>
+                                    `);
+                                } else {
+                                    updateStatus('error');
+                                    showResult(`
+                                        <div class="error-card">
+                                            <h4><i class="fas fa-times-circle"></i> Evidence Collection Failed</h4>
+                                            <p><strong>Error:</strong> ${jsonResponse.message}</p>
+                                        </div>
+                                    `);
+                                }
+                            } catch (e) {
+                                updateStatus('error');
+                                showResult(`
+                                    <div class="error-card">
+                                        <h4><i class="fas fa-exclamation-triangle"></i> Parse Error</h4>
+                                        <p>Could not parse response from evidence script.</p>
+                                        <p><strong>Details:</strong> ${e.message || 'Unknown error occurred'}</p>
+                                    </div>
+                                `);
+                            }
+                        } else {
+                            updateStatus('error');
+                            showResult(`
+                                <div class="error-card">
+                                    <h4><i class="fas fa-server"></i> Server Connection Error</h4>
+                                    <p>The Captain Fix server is not running. Please follow these steps:</p>
+                                    <ul style="margin-left: 20px; color: var(--text-secondary);">
+                                        <li>Open terminal in project folder</li>
+                                        <li>Run: <code>python server.py</code></li>
+                                        <li>Refresh this page: <code>http://localhost:8000/index.html</code></li>
+                                    </ul>
+                                </div>
+                            `);
+                        }
+                    }
+                };
+                xhr.send(JSON.stringify({
+                    websiteUrl: websiteUrl,
+                    testDepth: document.getElementById('testDepth').value || 12
+                }));
+            } catch (error) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-wifi"></i> Connection Error</h4>
+                        <p>Unable to connect to the Captain Fix server. Please ensure:</p>
+                        <ul style="margin-left: 20px; color: var(--text-secondary);">
+                            <li>The server is running (<code>python server.py</code>)</li>
+                            <li>You're accessing the page via <code>http://localhost:8000/index.html</code></li>
+                            <li>No firewall is blocking the connection</li>
+                        </ul>
+                    </div>
+                `);
+            }
+        });
+
+
+        // Healing Report Button
+        document.getElementById('healingReportBtn').addEventListener('click', function() {
+            updateStatus('loading');
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-magic fa-spin"></i> Loading Healing Report</h4>
+                    <p>Fetching self-healing test results...</p>
+                </div>
+            `);
+
+            fetch('http://localhost:8000/api/get-healing-report')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        updateStatus('error');
+                        showResult(`
+                            <div class="error-card">
+                                <h4><i class="fas fa-exclamation-circle"></i> No Healing Report Found</h4>
+                                <p>Run tests first to generate healing data.</p>
+                            </div>
+                        `);
+                    } else {
+                        updateStatus('success');
+                        const successRate = data.success_rate || '0%';
+                        const totalAttempts = data.total_healing_attempts || 0;
+                        const successfulHeals = data.successful_heals || 0;
+
+                        let healingLogHtml = '';
+                        if (data.healing_log && data.healing_log.length > 0) {
+                            healingLogHtml = '<div class="info-card"><h5>Healing Attempts:</h5><ul style="margin-left: 20px;">';
+                            data.healing_log.forEach(log => {
+                                const statusIcon = log.success ? '<i class="fas fa-check" style="color: var(--success-color);"></i>' : '<i class="fas fa-times" style="color: var(--error-color);"></i>';
+                                healingLogHtml += `
+                                    <li style="margin-bottom: 12px;">
+                                        ${statusIcon} <strong>${log.original_locator}</strong><br>
+                                        <small>Strategy: ${log.healing_strategy} | Time: ${log.timestamp}</small>
+                                    </li>
+                                `;
+                            });
+                            healingLogHtml += '</ul></div>';
+                        }
+
+                        showResult(`
+                            <div class="success-card">
+                                <h4><i class="fas fa-magic"></i> Self-Healing Report</h4>
+                                <p>AI-powered element healing results</p>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-number">${totalAttempts}</div>
+                                    <div class="stat-label">Healing Attempts</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">${successfulHeals}</div>
+                                    <div class="stat-label">Successful Heals</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">${successRate}</div>
+                                    <div class="stat-label">Success Rate</div>
+                                </div>
+                            </div>
+                            ${healingLogHtml}
+                        `);
+                    }
+                })
+                .catch(error => {
+                    updateStatus('error');
+                    showResult(`
+                        <div class="error-card">
+                            <h4><i class="fas fa-times-circle"></i> Connection Error</h4>
+                            <p>Unable to fetch healing report: ${error.message}</p>
+                        </div>
+                    `);
+                });
+        });
+
+        // Visual Regression Report Button
+        document.getElementById('visualReportBtn').addEventListener('click', function() {
+            updateStatus('loading');
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-eye fa-spin"></i> Loading Visual Report</h4>
+                    <p>Fetching visual regression results...</p>
+                </div>
+            `);
+
+            fetch('http://localhost:8000/api/get-visual-report')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        updateStatus('error');
+                        showResult(`
+                            <div class="error-card">
+                                <h4><i class="fas fa-exclamation-circle"></i> No Visual Report Found</h4>
+                                <p>Run visual regression tests first.</p>
+                            </div>
+                        `);
+                    } else {
+                        updateStatus('success');
+                        const totalPages = data.total_pages_tested || 0;
+                        const changedPages = data.pages_with_changes || 0;
+                        const unchangedPages = data.pages_unchanged || 0;
+
+                        let resultsHtml = '';
+                        if (data.results && data.results.length > 0) {
+                            resultsHtml = '<div class="info-card"><h5>Page Comparisons:</h5><ul style="margin-left: 20px;">';
+                            data.results.forEach(result => {
+                                const statusIcon = result.changes_detected ? '<i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i>' : '<i class="fas fa-check" style="color: var(--success-color);"></i>';
+                                resultsHtml += `
+                                    <li style="margin-bottom: 12px;">
+                                        ${statusIcon} <strong>${result.page}</strong> - ${result.diff_percentage} difference<br>
+                                        ${result.ai_analysis ? `<small style="color: var(--text-secondary);">${result.ai_analysis}</small>` : ''}
+                                    </li>
+                                `;
+                            });
+                            resultsHtml += '</ul></div>';
+                        }
+
+                        showResult(`
+                            <div class="success-card">
+                                <h4><i class="fas fa-eye"></i> Visual Regression Report</h4>
+                                <p>AI-powered visual change detection</p>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-number">${totalPages}</div>
+                                    <div class="stat-label">Pages Tested</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">${changedPages}</div>
+                                    <div class="stat-label">Changes Detected</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">${unchangedPages}</div>
+                                    <div class="stat-label">Unchanged</div>
+                                </div>
+                            </div>
+                            ${resultsHtml}
+                        `);
+                    }
+                })
+                .catch(error => {
+                    updateStatus('error');
+                    showResult(`
+                        <div class="error-card">
+                            <h4><i class="fas fa-times-circle"></i> Connection Error</h4>
+                            <p>Unable to fetch visual report: ${error.message}</p>
+                        </div>
+                    `);
+                });
+        });
+
+        // Run All + AI Features Button (Complete workflow with healing and visual regression)
+        document.getElementById('runAllAdvancedBtn').addEventListener('click', async function() {
+            const formData = new FormData(document.getElementById('captainForm'));
+            const data = Object.fromEntries(formData);
+
+            if (!data.websiteUrl) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Validation Error</h4>
+                        <p>Please enter a valid website URL before running the advanced workflow.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            const runAllAdvancedBtn = document.getElementById('runAllAdvancedBtn');
+            runAllAdvancedBtn.disabled = true;
+
+            updateStatus('loading');
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-rocket fa-spin"></i> <i class="fas fa-magic"></i> Running Advanced QA Workflow</h4>
+                    <p>Executing all steps with AI-powered self-healing and visual regression...</p>
+                    <div id="progressSteps" style="margin-top: 20px;">
+                        <div class="progress-step" id="advstep1">1. Create Test Plan - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="advstep2">2. Execute Tests (with Self-Healing) - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="advstep3">3. Collect Evidence - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="advstep4">4. Generate Report - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="advstep5">5. Analyze Healing Results - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="advstep6">6. Visual Regression Check - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="advstep7">7. Send Email - <span class="step-status">Waiting...</span></div>
+                    </div>
+                </div>
+            `);
+
+            try {
+                // Step 1: Create Plan
+                document.getElementById('advstep1').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('createPlan', data);
+                document.getElementById('advstep1').querySelector('.step-status').textContent = 'Completed ✓';
+
+                // Step 2: Execute Tests (with self-healing enabled)
+                document.getElementById('advstep2').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('execute', data);
+                document.getElementById('advstep2').querySelector('.step-status').textContent = 'Completed ✓';
+
+                // Step 3: Collect Evidence
+                document.getElementById('advstep3').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('collectEvidence', data);
+                document.getElementById('advstep3').querySelector('.step-status').textContent = 'Completed ✓';
+
+                // Step 4: Generate Report
+                document.getElementById('advstep4').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('generateReport', data);
+                document.getElementById('advstep4').querySelector('.step-status').textContent = 'Completed ✓';
+
+                // Step 5: Fetch Healing Report
+                document.getElementById('advstep5').querySelector('.step-status').textContent = 'Analyzing...';
+                const healingResponse = await fetch('http://localhost:8000/api/get-healing-report');
+                const healingData = await healingResponse.json();
+                document.getElementById('advstep5').querySelector('.step-status').textContent = healingData.error ? 'No data' : 'Completed ✓';
+
+                // Step 6: Fetch Visual Report
+                document.getElementById('advstep6').querySelector('.step-status').textContent = 'Analyzing...';
+                const visualResponse = await fetch('http://localhost:8000/api/get-visual-report');
+                const visualData = await visualResponse.json();
+                document.getElementById('advstep6').querySelector('.step-status').textContent = visualData.error ? 'No data' : 'Completed ✓';
+
+                // Step 7: Send Email
+                if (data.email && data.email.includes('@')) {
+                    document.getElementById('advstep7').querySelector('.step-status').textContent = 'Running...';
+                    await executeStep('sendEmail', data);
+                    document.getElementById('advstep7').querySelector('.step-status').textContent = 'Completed ✓';
+                } else {
+                    document.getElementById('advstep7').querySelector('.step-status').textContent = 'Skipped (No email)';
+                }
+
+                // Success summary
+                updateStatus('success');
+                showResult(`
+                    <div class="success-card">
+                        <h4><i class="fas fa-check-circle"></i> Advanced QA Workflow Completed!</h4>
+                        <p>All steps executed with AI-powered features.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-list-check"></i> Completed Steps</h4>
+                        <ul style="margin-left: 20px; color: var(--text-secondary);">
+                            <li>✓ Test Plan Created</li>
+                            <li>✓ Tests Executed (with Self-Healing)</li>
+                            <li>✓ Evidence Collected</li>
+                            <li>✓ Report Generated</li>
+                            <li>✓ Healing Analysis: ${healingData.error ? 'No healing attempts' : healingData.success_rate + ' success rate'}</li>
+                            <li>✓ Visual Regression: ${visualData.error ? 'No visual changes' : visualData.pages_with_changes + ' pages changed'}</li>
+                            <li>✓ ${data.email ? 'Email Sent' : 'Email Skipped'}</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-magic"></i> AI Features Active</h4>
+                        <p>Self-healing and visual regression detection were enabled during this run.</p>
+                        <p>Click "Healing Report" or "Visual Report" buttons to see detailed AI analysis.</p>
+                    </div>
+                `);
+
+            } catch (error) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-times-circle"></i> Workflow Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `);
+            } finally {
+                runAllAdvancedBtn.disabled = false;
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        document.getElementById('runAllBtn').addEventListener('click', async function() {
+            const formData = new FormData(document.getElementById('captainForm'));
+            const data = Object.fromEntries(formData);
+
+            // Validate required fields first
+            if (!data.websiteUrl) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-exclamation-circle"></i> Validation Error</h4>
+                        <p>Please enter a valid website URL before running all steps.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            // Disable the Run All button during execution
+            const runAllBtn = document.getElementById('runAllBtn');
+            runAllBtn.disabled = true;
+
+            updateStatus('loading');
+            showResult(`
+                <div class="info-card">
+                    <h4><i class="fas fa-rocket fa-spin"></i> Running Complete QA Workflow</h4>
+                    <p>Executing all steps: Server Start → Create Plan → Execute Tests → Collect Evidence → Send Email</p>
+                    <div id="progressSteps" style="margin-top: 20px;">
+                        <div class="progress-step" id="step1">1. Server Start Instructions - <span class="step-status">Ready</span></div>
+                        <div class="progress-step" id="step2">2. Create Test Plan - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="step3">3. Execute Tests - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="step4">4. Collect Evidence - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="step5">5. PM Tool Integration - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="step6">6. Generate Report - <span class="step-status">Waiting...</span></div>
+                        <div class="progress-step" id="step7">7. Send Email - <span class="step-status">Waiting...</span></div>
+
+
+                    </div>
+                </div>
+            `);
+
+            try {
+                // Step 1: Server Start (just display instructions)
+                document.getElementById('step1').querySelector('.step-status').textContent = 'Completed ✓';
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Brief pause
+
+                // Step 2: Create Plan
+                document.getElementById('step2').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('createPlan', data);
+                document.getElementById('step2').querySelector('.step-status').textContent = 'Completed ✓';
+
+                // Step 3: Execute Tests
+                document.getElementById('step3').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('execute', data);
+                document.getElementById('step3').querySelector('.step-status').textContent = 'Completed ✓';
+
+                // Step 4: Collect Evidence
+                document.getElementById('step4').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('collectEvidence', data);
+                document.getElementById('step4').querySelector('.step-status').textContent = 'Completed ✓';
+
+
+                // NEW STEP 5: PM Tool Integration (only if not 'none')
+                const pmTool = data.pmTool || 'none';
+                if (pmTool !== 'none') {
+                    document.getElementById('step5').querySelector('.step-status').textContent = 'Running...';
+                    try {
+                        await executeStep('pmIntegration', data);
+                        document.getElementById('step5').querySelector('.step-status').textContent = `Completed ✓ (${pmTool})`;
+                    } catch (error) {
+                        document.getElementById('step5').querySelector('.step-status').textContent = `Failed (${error.message})`;
+                        console.error('PM Integration error:', error);
+                    }
+                } else {
+                    document.getElementById('step5').querySelector('.step-status').textContent = 'Skipped (No PM tool selected)';
+                }
+
+
+                // Step 6: Generate Report
+                document.getElementById('step6').querySelector('.step-status').textContent = 'Running...';
+                await executeStep('generateReport', data);
+                document.getElementById('step6').querySelector('.step-status').textContent = 'Completed ✓';
+
+
+
+
+                // Step 7: Send Email (only if email is provided)
+                if (data.email && data.email.includes('@')) {
+                    document.getElementById('step7').querySelector('.step-status').textContent = 'Running...';
+                    await executeStep('sendEmail', data);
+                    document.getElementById('step7').querySelector('.step-status').textContent = 'Completed ✓';
+                } else {
+                    document.getElementById('step7').querySelector('.step-status').textContent = 'Skipped (No email provided)';
+                }
+
+
+                // Success
+                updateStatus('success');
+                const allureReportPath = "generated_files/allure-report/index.html";
+                showResult(`
+                    <div class="success-card">
+                        <h4><i class="fas fa-check-circle"></i> Complete QA Workflow Finished!</h4>
+                        <p>All steps have been executed successfully. Your test plan has been created, executed, evidence collected, and results delivered.</p>
+                        <div style="margin-top: 20px;">
+                            <p><strong>✓ Server Instructions Provided</strong></p>
+                            <p><strong>✓ Test Plan Created</strong></p>
+                            <p><strong>✓ Tests Executed</strong></p>
+                            <p><strong>✓ Evidence Collected</strong></p>
+                            <p><strong>✓ PM Tool Integration: ${pmTool !== 'none' ? pmTool : 'Skipped'}</strong></p>
+                            <p><strong>✓ Report Generated</strong></p>
+                            <p><strong>✓ ${data.email ? 'Email Sent' : 'Email Skipped'}</strong></p>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-chart-line"></i> Allure Test Report</h4>
+                        <p>A detailed interactive report is available with charts, logs, and screenshots.</p>
+                        <a href="${allureReportPath}" target="_blank"
+                           style="display:inline-block; margin-top:10px; text-decoration:none;">
+                            <button class="action-button btn-primary">
+                                <i class="fas fa-external-link-alt"></i> Open Allure Report
+                            </button>
+                        </a>
+                    </div>
+                `);
+
+            } catch (error) {
+                updateStatus('error');
+                showResult(`
+                    <div class="error-card">
+                        <h4><i class="fas fa-times-circle"></i> Workflow Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>The workflow was interrupted. You can run individual steps to continue.</p>
+                    </div>
+                `);
+            } finally {
+                // Re-enable the Run All button
+                runAllBtn.disabled = false;
+            }
+        });
+
+        // Helper function to execute individual steps
+        async function executeStep(stepType, data) {
+            return new Promise((resolve, reject) => {
+                let apiEndpoint = '';
+                let requestData = data;
+
+                switch (stepType) {
+                    case 'createPlan':
+                        apiEndpoint = 'http://localhost:8000/api/run-create-plan';
+                        break;
+                    case 'execute':
+                        apiEndpoint = 'http://localhost:8000/api/run-executor';
+                        break;
+                    case 'collectEvidence':
+                        apiEndpoint = 'http://localhost:8000/api/collect-evidence';
+                        requestData = {
+                            websiteUrl: data.websiteUrl,
+                            testDepth: data.testDepth || 12
+                        };
+                        break;
+
+
+                    case 'pmIntegration':
+                        apiEndpoint = 'http://localhost:8000/api/run-pm-integration';
+                        requestData = {}; // PM integration finds files automatically
+                        break;
+
+
+                    case 'sendEmail':
+                        if (!planData || !planData.data) {
+                            reject(new Error('No test plan data available for email'));
+                            return;
+                        }
+                        apiEndpoint = 'http://localhost:8000/api/send-email';
+                        requestData = {
+                            email: data.email,
+                            websiteUrl: planData.data.websiteUrl,
+                            testDepth: planData.data.testDepth,
+                            testPlan: planData.data.testPlan,
+                            excelFile: planData.data.excelFile,
+                            pmTool: planData.data.pmTool
+                        };
+                        break;
+                    default:
+                        reject(new Error(`Unknown step type: ${stepType}`));
+                        return;
+
+
+                    case 'generateReport':
+                        apiEndpoint = 'http://localhost:8000/api/generate-report';
+                        requestData = {
+                            websiteUrl: data.websiteUrl,
+                            testDepth: parseInt(data.testDepth) || 8
+                        };
+                        break;
+
+                }
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', apiEndpoint, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                const isExecuteStepSuccess = stepType === 'execute' && Array.isArray(response.test_results);
+                                const isGenerateReportSuccess = stepType === 'generateReport' && !response.error;
+                                if (isExecuteStepSuccess || isGenerateReportSuccess || response.status === 'success') {
+                                    // Store plan data for subsequent steps
+                                    if (stepType === 'createPlan') {
+                                        planData = response;
+                                    }
+                                    resolve(response);
+                                } else {
+                                    reject(new Error(response.message || response.error || 'Step failed'));
+                                }
+                            } catch (e) {
+                                reject(new Error(`Failed to parse response: ${e.message}`));
+                            }
+                        } else {
+                            reject(new Error(`Server error: ${xhr.status}`));
+                        }
+                    }
+                };
+
+                xhr.send(JSON.stringify(requestData));
+            });
+        }
+
+
+
+
+
+
+
+
+
+        // ==========================================
+        // CHATBOT WIDGET FUNCTIONALITY
+        // ==========================================
+
+        // Wait for DOM to be ready
+        window.addEventListener('load', function() {
+            console.log('Initializing chatbot...');
+
+            function toggleChatbot() {
+                const widget = document.getElementById('chatbotWidget');
+                const isActive = widget.classList.toggle('active');
+
+                if (isActive && document.getElementById('chatMessages').children.length === 0) {
+                    addChatMessage('👋 Welcome aboard Captain Fix! \nI am Captain Assistance, ready to help you on your journey. \n🧭 Type "HELP" to get started.', 'bot');
+                }
+
+                if (isActive) {
+                    document.getElementById('chatInput').focus();
+                }
+            }
+
+            function addChatMessage(text, sender) {
+                const messages = document.getElementById('chatMessages');
+                const msg = document.createElement('div');
+                msg.className = 'chat-message chat-' + sender;
+                msg.textContent = text;
+                messages.appendChild(msg);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            function handleChatCommand(command) {
+            const cmd = command.toLowerCase().trim();
+
+            // If we're waiting for URL input
+            if (awaitingUrlInput) {
+                // Check if user wants to cancel
+                if (cmd === 'cancel') {
+                    awaitingUrlInput = false;
+                    pendingCommand = null;
+                    return "Cancelled. Ready for new commands.";
+                }
+
+                // Check if input looks like a URL
+                if (command.includes('http://') || command.includes('https://') || command.includes('file:///') || command.includes('.com') || command.includes('.org') || command.includes('.net') || command.includes('.io') || command.includes('.app') || command.includes('.dev')) {
+                    // Add https:// if missing
+                    let url = command.trim();
+                    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file:///')) {
+                        url = 'https://' + url;
+                    }
+
+                    // Set the URL in the form field
+                    document.getElementById('websiteUrl').value = url;
+
+                    // Store the command to execute
+                    const commandToExecute = pendingCommand;
+
+                    // Reset state
+                    awaitingUrlInput = false;
+                    pendingCommand = null;
+
+                    // Show confirmation message
+                    addChatMessage("URL set to: " + url, 'bot');
+
+                    // Wait a bit then execute the command by triggering the button click directly
+                    setTimeout(function() {
+                        const cmdLower = commandToExecute.toLowerCase().trim();
+
+                        if (cmdLower === 'create plan' || cmdLower.includes('create')) {
+                            document.getElementById('createPlanBtn').click();
+                            addChatMessage("Executing: Create Plan", 'bot');
+                        }
+                        else if (cmdLower === 'run tests' || cmdLower === 'execute' || cmdLower === 'run test') {
+                            document.getElementById('executeBtn').click();
+                            addChatMessage("Executing: Run Tests", 'bot');
+                        }
+                        else if (cmdLower === 'run all') {
+                            document.getElementById('runAllBtn').click();
+                            addChatMessage("Executing: Run All", 'bot');
+                        }
+                        else if (cmdLower === 'collect evidence' || cmdLower.includes('evidence')) {
+                            document.getElementById('collectEvidenceBtn').click();
+                            addChatMessage("Executing: Collect Evidence", 'bot');
+                        }
+                        else if (cmdLower === 'report' || cmdLower === 'generate report') {
+                            document.getElementById('generateReportBtn').click();
+                            addChatMessage("Executing: Generate Report", 'bot');
+                        }
+                        else if (cmdLower === 'send email' || cmdLower === 'email') {
+                            document.getElementById('sendEmailBtn').click();
+                            addChatMessage("Executing: Send Email", 'bot');
+                        }
+                    }, 300);
+
+                    return null; // Don't return a message since we're using addChatMessage
+                } else {
+                    return "That doesn't look like a valid URL.\n\nPlease enter a URL like:\n• https://example.com\n• http://mysite.com\n• file:///C:/path/to/file.html\n\nOr type 'cancel' to cancel.";
+                }
+            }
+
+            // Get the URL from the form
+            const websiteUrl = document.getElementById('websiteUrl').value.trim();
+
+            // Commands that require URL validation
+            const urlRequiredCommands = ['create plan', 'create', 'run tests', 'execute', 'run test', 'run all', 'collect evidence', 'evidence', 'report', 'generate report', 'send email', 'email'];
+
+            // Check if command requires URL and URL is missing
+            const requiresUrl = urlRequiredCommands.some(reqCmd => cmd.includes(reqCmd) || cmd === reqCmd);
+
+            if (requiresUrl && !websiteUrl) {
+                awaitingUrlInput = true;
+                pendingCommand = command;
+                return "Please enter the website URL you want to test:\n\nExample: https://example.com\nor just: example.com\nor file:///C:/path/to/file.html";
+            }
+
+
+            if (cmd === 'help' || cmd.includes('help')) {
+                // return "Available commands:\n\n• 'create plan' - Generate test plan\n• 'run tests' - Execute tests\n• 'run all' - Execute complete workflow\n• 'collect evidence' - Gather test evidence\n• 'report' - Generate test report\n• 'send email' - Email results\n• 'status' - Check system status\n• 'clear' - Clear chat";
+                return "Available commands:\n\n• 'create plan' - Generate test plan\n• 'run tests' - Execute tests\n• 'run all' - Execute complete workflow\n• 'run advanced' - Run with AI features\n• 'healing' - View self-healing report\n• 'visual' - View visual regression report\n• 'collect evidence' - Gather test evidence\n• 'report' - Generate test report\n• 'send email' - Email results\n• 'status' - Check system status\n• 'clear' - Clear chat";
+            }
+            else if (cmd === 'create plan' || cmd.includes('create')) {
+                document.getElementById('createPlanBtn').click();
+                return "Triggering test plan creation for: " + websiteUrl;
+            }
+            else if (cmd === 'run tests' || cmd === 'execute' || cmd === 'run test') {
+                document.getElementById('executeBtn').click();
+                return "Starting test execution for: " + websiteUrl;
+            }
+            else if (cmd === 'run all') {
+                document.getElementById('runAllBtn').click();
+                return "Starting complete workflow for: " + websiteUrl;
+            }
+            else if (cmd === 'collect evidence' || cmd.includes('evidence')) {
+                document.getElementById('collectEvidenceBtn').click();
+                return "Collecting test evidence...";
+            }
+            else if (cmd === 'report' || cmd === 'generate report') {
+                document.getElementById('generateReportBtn').click();
+                return "Generating test report...";
+            }
+            else if (cmd === 'send email' || cmd === 'email') {
+                const emailField = document.getElementById('email').value.trim();
+                if (!emailField || !emailField.includes('@')) {
+                    return "Please enter a valid email address in the 'Email Address' field first.";
+                }
+                document.getElementById('sendEmailBtn').click();
+                return "Sending email to: " + emailField;
+            }
+            else if (cmd.includes('status')) {
+                const urlStatus = websiteUrl ? "URL set: " + websiteUrl : "No URL set";
+                return "System Status:\n• Server: Ready\n• Interface: Active\n• " + urlStatus + "\n• Ready for testing";
+            }
+            else if (cmd === 'clear') {
+                document.getElementById('chatMessages').innerHTML = '';
+                document.getElementById('websiteUrl').value = '';  // Clear the URL field
+                awaitingUrlInput = false;  // Reset URL input state
+                pendingCommand = null;     // Clear any pending command
+                addChatMessage('Chat and URL cleared!', 'bot');
+                return null;
+            }
+            else if (cmd === '') {
+                return "Please enter a command. Type 'help' for available commands.";
+            }
+            else if (cmd === 'healing' || cmd === 'healing report') {
+                document.getElementById('healingReportBtn').click();
+                return "Loading self-healing analysis...";
+            }
+            else if (cmd === 'visual' || cmd === 'visual report') {
+                document.getElementById('visualReportBtn').click();
+                return "Loading visual regression report...";
+            }
+            else if (cmd === 'run advanced' || cmd === 'advanced') {
+                document.getElementById('runAllAdvancedBtn').click();
+                return "Starting advanced workflow with AI features...";
+            }
+            else {
+                return 'Unknown command: "' + command + '"\n\nType "help" to see available commands.';
+            }
+        }
+
+            const chatbotToggle = document.getElementById('chatbotToggle');
+            const chatbotClose = document.getElementById('chatbotClose');
+            const chatSend = document.getElementById('chatSend');
+            const chatInput = document.getElementById('chatInput');
+
+            if (chatbotToggle) {
+                chatbotToggle.addEventListener('click', toggleChatbot);
+                console.log('Toggle button listener attached');
+            } else {
+                console.error('chatbotToggle button not found!');
+            }
+
+            if (chatbotClose) {
+                chatbotClose.addEventListener('click', toggleChatbot);
+            }
+
+            if (chatSend) {
+                chatSend.addEventListener('click', function() {
+                    const text = chatInput.value.trim();
+                    if (text) {
+                        addChatMessage(text, 'user');
+                        const reply = handleChatCommand(text);
+                        if (reply) {
+                            setTimeout(function() {
+                                addChatMessage(reply, 'bot');
+                            }, 300);
+                        }
+                        chatInput.value = '';
+                    }
+                });
+            }
+
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        chatSend.click();
+                    }
+                });
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Floating Chatbot Widget -->
+    <button class="chatbot-toggle" id="chatbotToggle" type="button">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i class="fas fa-robot"></i>
+                Captain Assistant
+            </div>
+            <button class="chatbot-close" id="chatbotClose" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatMessages"></div>
+        <div class="chatbot-input-area">
+            <input type="text" class="chatbot-input" id="chatInput" placeholder="Type a command (try 'help')..." autocomplete="off">
+            <button class="chatbot-send" id="chatSend" type="button">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+
+
+
+
+</body>
+</html>
+
